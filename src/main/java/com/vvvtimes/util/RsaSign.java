@@ -10,7 +10,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPrivateKeySpec;
 
 
-public class rsasign {
+public class RsaSign {
     static String header = "<!-- 537606aed546c5ba42c0820ad7fd0d74ee7caf90c232a484d0464b3332c42a9189555aebdba3570fe6566842ba7b7bb88da360f202ae9536a2a12fcdf39600c7 --><ObtainTicketResponse><message></message><prolongationPeriod>607875500</prolongationPeriod><responseCode>OK</responseCode><salt>1508484258274</salt><ticketId>1</ticketId><ticketProperties>licensee=Administrator    licenseType=0   </ticketProperties></ObtainTicketResponse>";
     static String content = "<ObtainTicketResponse><message></message><prolongationPeriod>607875500</prolongationPeriod><responseCode>OK</responseCode><salt>1508484258274</salt><ticketId>1</ticketId><ticketProperties>licensee=Administrator    licenseType=0   </ticketProperties></ObtainTicketResponse>";
     String ASNKEY = "-----BEGIN RSA PRIVATE KEY-----\r\n"
@@ -48,11 +48,11 @@ public class rsasign {
             + "O98RPCU0nJg=";
 	
 	public static String Sign(String content){
-	    return rsasign.Sign(content.getBytes(), key22);
+	    return RsaSign.Sign(content.getBytes(), key22);
 	}
 	
 	public static String Sign2(String content){
-        return rsasign.Sign2(content.getBytes(), key33);
+        return RsaSign.Sign2(content.getBytes(), key33);
     }
 	
 	//传入秘钥为ASN格式

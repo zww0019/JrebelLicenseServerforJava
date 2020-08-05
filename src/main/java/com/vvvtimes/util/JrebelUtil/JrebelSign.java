@@ -1,4 +1,4 @@
-package com.vvvtimes.JrebelUtil;
+package com.vvvtimes.util.JrebelUtil;
 
 import org.apache.commons.lang3.StringUtils;
 

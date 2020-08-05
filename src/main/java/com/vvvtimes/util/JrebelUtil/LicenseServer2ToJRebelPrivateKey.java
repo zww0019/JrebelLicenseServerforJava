@@ -1,4 +1,4 @@
-package com.vvvtimes.JrebelUtil;
+package com.vvvtimes.util.JrebelUtil;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
