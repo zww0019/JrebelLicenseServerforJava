@@ -5,7 +5,7 @@ A license server for Jrebel & JetBrains products, it also support JRebel for And
 ***
 Thank ilanyu
 
-NOTE: This is provided for educational purposes only. Please support genuine.
+NOTE1: This is provided for educational purposes only. Please support genuine.
 ***
 ## Setup
 Run:
