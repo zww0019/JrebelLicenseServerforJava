@@ -2,6 +2,7 @@ package com.vvvtimes.util;
 
 
 public class Base64 {
+	private Base64(){}
 	/**
 	 * 编码
 	 * 
