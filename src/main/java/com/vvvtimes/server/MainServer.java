@@ -54,10 +54,15 @@ public class MainServer extends AbstractHandler {
         server.setHandler(new MainServer());
         server.start();
 
-        System.out.println("License Server started at http://localhost:" + port);
-        System.out.println("JetBrains Activation address was: http://localhost:" + port + "/");
-        System.out.println("JRebel 7.1 and earlier version Activation address was: http://localhost:" + port + "/{tokenname}, with any email.");
-        System.out.println("JRebel 2018.1 and later version Activation address was: http://localhost:" + port + "/{guid}(eg:http://localhost:" + port + "/" + UUID.randomUUID().toString() + "), with any email.");
+        String serverStr = "http://localhost";
+		if (!"80".equals(port)) {
+			serverStr = serverStr + ":" + port;
+		}
+
+        System.out.println("License Server started at " + serverStr);
+        System.out.println("JetBrains Activation address was: " + serverStr + "/");
+        System.out.println("JRebel 7.1 and earlier version Activation address was: " + serverStr + "/{tokenname}, with any email.");
+        System.out.println("JRebel 2018.1 and later version Activation address was: " + serverStr + "/{guid}(eg:http://localhost:" + port + "/" + UUID.randomUUID().toString() + "), with any email.");
 
         server.join();
     }
