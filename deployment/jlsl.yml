@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: jlsl
+  name: jlsl
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jlsl
+  template:
+    metadata:
+      labels:
+        app: jlsl
+    spec:
+      containers:
+        - image: 'repo_placeholder/app_placeholder:tag_placeholder'
+          name: jlsl
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8081
+              name: jlsl
+              protocol: TCP
+          resources:
+            requests:
+              cpu: '0.1'
+              memory: 100Mi
+            limits:
+              cpu: '0.4'
+              memory: 400Mi
