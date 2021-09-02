@@ -1,35 +1,41 @@
-def label = "jenkins-slave-${UUID.randomUUID().toString()}"
+def app_name='jlsl'
+def deployment_name='jlsl'
+def deployment_file='deployment-14.yml'
+def img_tag="${UUID.randomUUID().toString().substring(0,5)}"
 podTemplate(
-    label: label,
-    containers: [
-        containerTemplate(name: 'maven', image: 'maven:3.8.1-jdk-8', ttyEnabled: true, command: 'cat', privileged: false),
-        containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.18.17', command: 'cat', ttyEnabled: true, privileged: false),
-        containerTemplate(name: 'buildctl',image:'shopstic/buildctl:0.8.3-2',command: 'cat' , ttyEnabled: true, privileged: false)
-    ],
-    namespace: 'jenkins',
-    serviceAccount: 'jenkins',
-    volumes: [
-        hostPathVolume(hostPath: '/appdata/jenkins_data_k8s/localrepository',mountPath: '/root/.m2'),
-        hostPathVolume(hostPath: '/appdata/jar',mountPath:'/mnt')
-    ],
-    workspaceVolume: hostPathWorkspaceVolume('/appdata/jenkins_data_k8s')
+	inheritFrom: 'kubernetes',
+	containers: [
+	    containerTemplate(name: 'maven', image: 'maven:3.8-openjdk-8', ttyEnabled: true, command: 'cat', privileged: false)
+	],
+    label: 'commonbuild',
+    name: 'commonbuild'
 ){
-    node(label) {
+	node('commonbuild') {
         stage('Get a maven project') {
-            git credentialsId: 'new',url: 'https://github.com/zww0019/JrebelLicenseServerforJava.git'
-            script {
-                        env.container_name='jlsl'
-                        env.image_tag = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
-                        env.repo_name = 'registry.kdphoto.cn'
-                        env.app_name = 'jlsl'
-                    }
+            git credentialsId: 'zww',url: 'https://github.com/zww0019/JrebelLicenseServerforJava.git'
             container('maven') {
                 stage('打包') {
                     sh 'mvn clean install -f pom.xml -Dmaven.test.skip=true'
                 }
             }
         }
-        stage('Build a image'){
+    }
+}
+podTemplate(
+    label: 'buildimage',
+    inheritFrom: 'kubernetes',
+	containers: [
+	    containerTemplate(name: 'buildctl',image:'shopstic/buildctl:0.9.0',command: 'cat' , ttyEnabled: true, privileged: false)
+	],
+	envVars: [
+	    envVar(key: 'app_name',value: app_name),
+	    envVar(key: 'image_tag',value: img_tag)
+	],
+	nodeSelector: 'kubernetes.io/arch=amd64'
+
+){
+	node('buildimage') {
+        stage('Build a Image') {
             container('buildctl'){
                 stage('构建镜像'){
                     sh 'buildctl \
@@ -39,17 +45,37 @@ podTemplate(
                 }
             }
         }
-        stage('Run pod'){
+    }
+}
+podTemplate(
+    label: 'deploymentpod',
+    inheritFrom: 'kubernetes',
+	containers: [
+	    containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.18.20', command: 'cat', ttyEnabled: true, privileged: false)
+	],
+	envVars: [
+	    envVar(key: 'app_name',value: app_name),
+	    envVar(key: 'deployment_file',value: deployment_file),
+	    envVar(key: 'deployment_name',value: deployment_name),
+	    envVar(key: 'image_tag',value: img_tag)
+	],
+	nodeSelector: 'node-role.kubernetes.io/master=true'
+){
+	node('deploymentpod') {
+        stage('Deploy') {
             container('kubectl'){
                 stage('run'){
-                    sh "sed -i 's/repo_placeholder/${repo_name}/' deployment/${app_name}.yml"
-                    sh "sed -i 's/app_placeholder/${app_name}/' deployment/${app_name}.yml"
-                    sh "sed -i 's/tag_placeholder/${image_tag}/' deployment/${app_name}.yml"
+                    // 复制deployment文件到当前目录
+                    sh "cp /opt/k8s-design/${deployment_file} ./"
 
-                    sh 'kubectl apply -f deployment/${app_name}.yml'
+                    sh "sed -i 's/repo_placeholder/${repo_name}/' ${deployment_file}"
+                    sh "sed -i 's/app_placeholder/${app_name}/' ${deployment_file}"
+                    sh "sed -i 's/tag_placeholder/${image_tag}/' ${deployment_file}"
+                    sh "cat ${deployment_file}"
+                    sh 'kubectl apply -f ${deployment_file}'
                 }
                 stage('verification'){
-                    sh 'kubectl rollout status -n default deployment ${app_name}'
+                    sh 'kubectl rollout status -n default deployment ${deployment_name}'
                 }
             }
         }
