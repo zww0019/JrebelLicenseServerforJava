@@ -60,7 +60,7 @@ podTemplate(
 	    envVar(key: 'image_tag',value: img_tag)
 	],
 	volumes: [
-            persistentVolumeClaim(claimName: 'pvc-nfs-other-provisioner-nfs-subdir-external-provisioner',mountPath: '/opt'),
+            persistentVolumeClaim(claimName: 'pvc-nfs-other-provisioner-nfs-subdir-external-provisioner',mountPath: '/mnt'),
         ],
 	nodeSelector: 'node-role.kubernetes.io/master=true'
 ){
@@ -69,7 +69,7 @@ podTemplate(
             container('kubectl'){
                 stage('run'){
                     // 复制deployment文件到当前目录
-                    sh "cp /opt/k8s/${deployment_file} ./"
+                    sh "cp /mnt/k8s/${deployment_file} ./"
 
                     sh "sed -i 's/repo_placeholder/${repo_name}/' ${deployment_file}"
                     sh "sed -i 's/app_placeholder/${app_name}/' ${deployment_file}"
