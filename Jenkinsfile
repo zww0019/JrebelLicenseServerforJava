@@ -1,6 +1,7 @@
 def app_name='jlsl'
 def deployment_name='jlsl'
 def deployment_file='deployment-14.yml'
+def service_file='service-17.yml'
 def img_tag="${UUID.randomUUID().toString().substring(0,5)}"
 podTemplate(
 	inheritFrom: 'kubernetes',
@@ -76,6 +77,7 @@ podTemplate(
                     sh "sed -i 's/tag_placeholder/${image_tag}/' ${deployment_file}"
                     sh "cat ${deployment_file}"
                     sh 'kubectl apply -f ${deployment_file}'
+                    sh 'kubectl apply -f ${service_file}'
                 }
                 stage('verification'){
                     sh 'kubectl rollout status -n default deployment ${deployment_name}'
