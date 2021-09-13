@@ -2,6 +2,7 @@ def app_name='jlsl'
 def deployment_name='jlsl'
 def deployment_file='deployment-14.yml'
 def img_tag="${UUID.randomUUID().toString().substring(0,5)}"
+def service_file='service-17.yml'
 podTemplate(
 	inheritFrom: 'kubernetes',
 	containers: [
@@ -57,7 +58,8 @@ podTemplate(
 	    envVar(key: 'app_name',value: app_name),
 	    envVar(key: 'deployment_file',value: deployment_file),
 	    envVar(key: 'deployment_name',value: deployment_name),
-	    envVar(key: 'image_tag',value: img_tag)
+	    envVar(key: 'image_tag',value: img_tag),
+	    envVar(key: 'service_file',value: service_file)
 	],
 	volumes: [
             persistentVolumeClaim(claimName: 'pvc-nfs-other-provisioner-nfs-subdir-external-provisioner',mountPath: '/mnt'),
@@ -76,6 +78,7 @@ podTemplate(
                     sh "sed -i 's/tag_placeholder/${image_tag}/' ${deployment_file}"
                     sh "cat ${deployment_file}"
                     sh 'kubectl apply -f ${deployment_file}'
+                    sh 'kubectl apply -f ${service_file}'
                 }
                 stage('verification'){
                     sh 'kubectl rollout status -n default deployment ${deployment_name}'
