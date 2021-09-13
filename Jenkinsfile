@@ -1,6 +1,7 @@
 def app_name='jlsl'
 def deployment_name='jlsl'
 def deployment_file='deployment-14.yml'
+def service_file='service-17.yml'
 def img_tag="${UUID.randomUUID().toString().substring(0,5)}"
 def service_file='service-17.yml'
 podTemplate(
