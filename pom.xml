@@ -10,6 +10,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
   </properties>
 
   <build>
@@ -26,7 +27,29 @@
           <encoding>utf8</encoding>
         </configuration>
       </plugin>
-
+      <plugin>
+        <groupId>com.spotify</groupId>
+        <artifactId>dockerfile-maven-plugin</artifactId>
+        <version>1.4.13</version>
+        <executions>
+          <execution>
+            <id>default</id>
+            <goals>
+              <goal>build</goal>
+              <goal>push</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
+          <repository>docker.io/xiemu/jlsl</repository>
+          <dockerfile>${project.basedir}/Dockerfile</dockerfile>
+          <tag>${maven.build.timestamp}</tag>
+          <buildArgs>
+            <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
+          </buildArgs>
+        </configuration>
+      </plugin>
       <!-- 打包可运行jar包 -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

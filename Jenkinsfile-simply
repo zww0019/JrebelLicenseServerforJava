@@ -1,0 +1,65 @@
+def createAppName() {
+    return 'jlsl'
+}
+def createVersion() {
+    // 定义一个版本号作为当次构建的版本，输出结果 20191210175842_69
+    return new Date().format('yyyyMMddHHmmss') + "_${env.BUILD_ID}"
+}
+pipeline {
+    agent any
+    environment {
+        _version = createVersion()
+        _appName = createAppName()
+        DOCKERHUB_CREDENTIALS=credentials('dockerhub')
+    }
+    stages {
+        stage('Build') {
+            agent {
+                docker {
+                   image 'maven:3.8-openjdk-8'
+                   args '-e MAVEN_CONFIG=/var/jenkins_home/.m2 '
+                   reuseNode true
+                }
+            }
+            steps {
+                sh 'mvn clean install -f pom.xml -Duser.home=/var/jenkins_home -Dmaven.test.skip=true'
+            }
+        }
+        stage('copy'){
+            steps {
+                sshPublisher(
+    publishers: [
+      sshPublisherDesc(
+        configName: 'maxvssh',
+        transfers: [
+          sshTransfer(
+            cleanRemote: true,
+            excludes: '',
+            execCommand: """
+                docker build -f jenkins_workspace/$_appName/Dockerfile -t xiemu/${_appName}:$_version jenkins_workspace/$_appName
+                echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
+                docker push xiemu/${_appName}:$_version
+                docker service update --image xiemu/${_appName}:$_version ${_appName}
+                docker rmi xiemu/${_appName}:$_version
+            """,
+            execTimeout: 0,
+            flatten: false,
+            makeEmptyDirs: false,
+            noDefaultExcludes: false,
+            patternSeparator: '[, ]+',
+            remoteDirectory: "/jenkins_workspace/$_appName",
+            remoteDirectorySDF: false,
+            removePrefix: "",
+            sourceFiles: "target/*.jar,Dockerfile"
+          )
+        ],
+        usePromotionTimestamp: false,
+        useWorkspaceInPromotion: false,
+        verbose: true
+      )
+    ]
+  )
+            }
+        }
+    }
+}
