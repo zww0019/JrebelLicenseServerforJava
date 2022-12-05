@@ -27,7 +27,7 @@
           <encoding>utf8</encoding>
         </configuration>
       </plugin>
-      <plugin>
+      <!--<plugin>
         <groupId>com.spotify</groupId>
         <artifactId>dockerfile-maven-plugin</artifactId>
         <version>1.4.13</version>
@@ -49,7 +49,7 @@
             <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
           </buildArgs>
         </configuration>
-      </plugin>
+      </plugin>-->
       <!-- 打包可运行jar包 -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
